@@ -86,8 +86,28 @@ def create_task():
 def update_task(task_id):
     try:
         data = request.json
-        properties = data['properties']
-        response = notion.pages.update(page_id=task_id, properties=properties)
+        updated_properties = {}
+
+        if 'dueDate' in data:
+            updated_properties["Due"] = {
+                "date": {
+                    "start": data['dueDate']
+                }
+            }
+
+        if 'priority' in data:
+            updated_properties["Priority"] = {
+                "status": {  # Assuming Priority is a status property
+                    "name": data['priority']
+                }
+            }
+
+        # Add other properties here if needed
+
+        response = notion.pages.update(
+            page_id=task_id,
+            properties=updated_properties
+        )
         return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
